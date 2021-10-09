@@ -15,6 +15,8 @@ public class Menu {
         System.out.println("ls_name_desc - 제목역순 정렬");
         System.out.println("ls_date - 날짜순 정렬");
         System.out.println("ls_date_desc - 최신순 정렬");
+        System.out.println("comp <Id> - 완료시키기");
+        System.out.println("ls_comp - 완료된 것만 나타내기");
         System.out.println("exit - 종료");
     }
     public static void prompt() {
