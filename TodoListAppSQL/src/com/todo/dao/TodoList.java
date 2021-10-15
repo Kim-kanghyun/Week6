@@ -70,6 +70,39 @@ public class TodoList {
 		return count;
 	}
 	
+	public int postponeItem(int id) {
+		ArrayList<TodoItem>list=new ArrayList<TodoItem>();
+		Statement stmt;
+		PreparedStatement pstmt;
+		int count=0;
+		String sql1="SELECT due_date,postpone FROM list"
+					+ " where id = "+id+";";
+		String sql2="update list set due_date=?, postpone=?"
+				+ " where id = ?;";
+			try {
+				stmt=conn.createStatement();
+				ResultSet rs=stmt.executeQuery(sql1);
+				rs.next();
+				String due_date=rs.getString("due_date");
+				int postnum=rs.getInt("postpone");
+				postnum++;
+				int new_date=Integer.parseInt(due_date.substring(0,4))*10000
+						+Integer.parseInt(due_date.substring(5,7))*100
+						+Integer.parseInt(due_date.substring(8,10))+1;
+				String n_date=Integer.toString(new_date/10000)+"/"+Integer.toString(new_date/100-((new_date/10000)*100))+"/"+Integer.toString(new_date%100);
+				pstmt=conn.prepareStatement(sql2);
+				pstmt.setString(1, n_date);
+				pstmt.setInt(2, postnum);
+				pstmt.setInt(3, id);
+				count= pstmt.executeUpdate();
+				pstmt.close();
+				stmt.close();
+			} catch(SQLException e) {
+				e.printStackTrace();
+			}
+			return count;
+		}
+	
 	
 	public ArrayList<TodoItem> getList() {
 		ArrayList<TodoItem>list=new ArrayList<TodoItem>();
@@ -86,10 +119,14 @@ public class TodoList {
 				String due_date=rs.getString("due_date");
 				String current_date =rs.getString("current_date");
 				int comp=rs.getInt("is_completed");
+				int late=rs.getInt("late");
+				int postpone=rs.getInt("postpone");
 				TodoItem t =new TodoItem(title,description,category,due_date);
 				t.setId(id);
 				t.setComp(comp);
 				t.setCurrent_date(current_date);
+				t.setLate(late);
+				t.setPostpone(postpone);
 				list.add(t);
 			}
 			stmt.close();
@@ -115,6 +152,54 @@ public class TodoList {
 			return count;
 	}
 
+	public int lateChecker() {
+		ArrayList<TodoItem>list=new ArrayList<TodoItem>();
+		Statement stmt;
+		PreparedStatement pstmt;
+		int count=0;
+		try {
+			stmt=conn.createStatement();
+			String sql1="SELECT * FROM list;";
+			String sql2="update list set late=?"
+					+ " where id = ?;";
+			ResultSet rs =stmt.executeQuery(sql1);
+			while(rs.next()) {
+				int id=rs.getInt("id");
+				String category=rs.getString("category");
+				String title=rs.getString("title");
+				String description=rs.getString("memo");
+				String due_date=rs.getString("due_date");
+				String current_date =rs.getString("current_date");
+				TodoItem t =new TodoItem(title,description,category,due_date);
+				int d_date=Integer.parseInt(due_date.substring(0,4))*10000
+						+Integer.parseInt(due_date.substring(5,7))*100
+						+Integer.parseInt(due_date.substring(8,10));
+				int c_date=Integer.parseInt(current_date.substring(0,4))*10000
+						+Integer.parseInt(current_date.substring(5,7))*100
+						+Integer.parseInt(current_date.substring(8,10));
+				if(c_date>d_date) {
+					pstmt=conn.prepareStatement(sql2);
+					pstmt.setInt(1, 1);
+					pstmt.setInt(2, id);
+					count= pstmt.executeUpdate();
+					pstmt.close();
+				}
+				else {
+					pstmt=conn.prepareStatement(sql2);
+					pstmt.setInt(1, 0);
+					pstmt.setInt(2, id);
+					count= pstmt.executeUpdate();
+					pstmt.close();
+				}
+				list.add(t);
+			}
+				
+		} catch(SQLException e) {
+				e.printStackTrace();
+			}
+			return count;
+			
+	}
 	
 	public ArrayList<TodoItem> getOrderedList(String orderby,int ordering){
 		ArrayList<TodoItem> list=new ArrayList<TodoItem>();
@@ -160,6 +245,8 @@ public class TodoList {
 		}
 		return count;
 	}
+	
+	
 	
 	public Boolean isDuplicate(String title) {
 		Statement stmt;
@@ -209,6 +296,7 @@ public class TodoList {
 			e.printStackTrace();
 		}
 	}
+	
 	public ArrayList<String> getCategories() {
 		ArrayList<String> list =new ArrayList<String>();
 		Statement stmt;
@@ -245,10 +333,12 @@ public class TodoList {
 				String due_date=rs.getString("due_date");
 				String current_date =rs.getString("current_date");
 				int comp=rs.getInt("is_completed");
+				int late=rs.getInt("late");
 				TodoItem t =new TodoItem(title,description,category,due_date);
 				t.setId(id);
 				t.setCurrent_date(current_date);
 				t.setComp(comp);
+				t.setLate(late);
 				list.add(t);
 			}
 			pstmt.close();
@@ -258,7 +348,39 @@ public class TodoList {
 		return list;
 	}
 	
-	public ArrayList<TodoItem> getList(int num) {
+	public ArrayList<TodoItem> getListCategory(String keyword){
+		ArrayList<TodoItem> list=new ArrayList<TodoItem>();
+		PreparedStatement pstmt;
+		try {
+			String sql="SELECT * FROM list WHERE category = ?";
+			pstmt=conn.prepareStatement(sql);
+			pstmt.setString(1, keyword);
+			ResultSet rs= pstmt.executeQuery();
+			while(rs.next()) {
+				int id=rs.getInt("id");
+				String category=rs.getString("category");
+				String title=rs.getString("title");
+				String description=rs.getString("memo");
+				String due_date=rs.getString("due_date");
+				String current_date =rs.getString("current_date");
+				int comp=rs.getInt("is_completed");
+				int late=rs.getInt("late");
+				TodoItem t =new TodoItem(title,description,category,due_date);
+				t.setId(id);
+				t.setCurrent_date(current_date);
+				t.setComp(comp);
+				t.setLate(late);
+				list.add(t);
+			}
+			pstmt.close();
+		} catch(SQLException e) {
+			e.printStackTrace();
+		}
+		return list;
+	}
+	
+	
+	public ArrayList<TodoItem> getList1(int num) {
 		ArrayList<TodoItem> list =new ArrayList<TodoItem>();
 		PreparedStatement pstmt;
 		try {
@@ -274,11 +396,48 @@ public class TodoList {
 				String due_date=rs.getString("due_date");
 				String current_date =rs.getString("current_date");
 				int comp=rs.getInt("is_completed");
+				int late=rs.getInt("late");
 				TodoItem t =new TodoItem(title,description,category,due_date);
 				t.setId(id);
 				t.setCurrent_date(current_date);
 				t.setComp(comp);
+				t.setLate(late);
 				list.add(t);
+			}
+			pstmt.close();
+		} catch(SQLException e) {
+			e.printStackTrace();
+		}
+		return list;
+	}
+	
+	
+	
+	public ArrayList<TodoItem> getList2(int num) {
+		ArrayList<TodoItem> list =new ArrayList<TodoItem>();
+		PreparedStatement pstmt;
+		try {
+			String sql= "SELECT * FROM list WHERE late= ?";
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setInt(1, num);
+			ResultSet rs=pstmt.executeQuery();
+			while(rs.next()) {
+				int id=rs.getInt("id");
+				String category=rs.getString("category");
+				String title=rs.getString("title");
+				String description=rs.getString("memo");
+				String due_date=rs.getString("due_date");
+				String current_date =rs.getString("current_date");
+				int comp=rs.getInt("is_completed");
+				int late=rs.getInt("late");
+				if(comp!=1&&late==1) {
+					TodoItem t =new TodoItem(title,description,category,due_date);
+					t.setId(id);
+					t.setCurrent_date(current_date);
+					t.setComp(comp);
+					t.setLate(late);
+					list.add(t);
+				}
 			}
 			pstmt.close();
 		} catch(SQLException e) {

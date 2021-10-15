@@ -11,7 +11,25 @@ public class TodoItem {
     private String due_date;
     private int id;
     private int comp;
+    private int late;
+    private int postpone;
     
+
+	public int getPostpone() {
+		return postpone;
+	}
+
+	public void setPostpone(int postpone) {
+		this.postpone = postpone;
+	}
+
+	public int getLate() {
+		return late;
+	}
+
+	public void setLate(int late) {
+		this.late = late;
+	}
 
 	public int getComp() {
 		return comp;
@@ -89,20 +107,30 @@ public class TodoItem {
     		return false;
     }
     
+    public boolean is_late(int late) {
+    	if(late==1)
+    		return true;
+    	else
+    		return false;
+    }
+    
 	@Override
 	public String toString() {
+		String str;
 		if(is_completed(comp)) {
-			return id+". [" + category + "] "+title+"[V] - "+desc+" - "+due_date+" - "+ current_date;
+			str= id+". [" + category + "] "+title+"[V] - "+desc+" - "+due_date+" - "+ current_date;
+		}
+		else if(is_late(late)){
+			str= id+". [" + category + "] "+title+"[지각] - "+desc+" - "+due_date+" - "+ current_date;
 		}
 		else {
-			return id+". [" + category + "] "+title+" - "+desc+" - "+due_date+" - "+ current_date;
+			str= id+". [" + category + "] "+title+" - "+desc+" - "+due_date+" - "+ current_date;
 		}
-		
+		if(postpone>0) {
+			str+=(" "+postpone+"회 연기하였습니다.");
+		}
+		return str;
 	}
 	
-	public String toSaveString() {
-		return title+"##"+category+"##"+desc+"##"+due_date+"##"+current_date+"\n";
-	}
-    
     
 }

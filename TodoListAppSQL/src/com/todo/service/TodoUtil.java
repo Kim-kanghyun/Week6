@@ -51,6 +51,19 @@ public class TodoUtil {
 		if(l.deleteItem(index)>0)
 			System.out.println("삭제되었습니다.");
 	}
+	
+	public static void deleteItemMul(TodoList l) {
+		
+		Scanner sc = new Scanner(System.in);
+		
+		String line=sc.nextLine();
+		StringTokenizer st =new StringTokenizer(line, " ");
+		while(st.hasMoreTokens()) {
+			int index=Integer.parseInt(st.nextToken());
+			if(l.deleteItem(index)>0)
+				System.out.println("삭제되었습니다.");
+				}
+	}
 
 
 	public static void updateItem(TodoList l) {
@@ -88,6 +101,21 @@ public class TodoUtil {
 		}
 	}
 	
+	public static void checkAll(TodoList l) {
+		if(l.lateChecker()>0)
+			System.out.println("확인하였습니다.");
+	}
+	
+	
+	public static void findCateList(TodoList l, String cate) {
+		int count=0;
+		for(TodoItem item : l.getListCategory(cate)) {
+			System.out.println(item.toString());
+			count++;
+		}
+		System.out.printf("\n총 %d개의 항목을 찾았습니다.\n", count);
+	}
+	
 	public static void listCateAll(TodoList l) {
 		int count=0;
 		for(String item : l.getCategories()) {
@@ -96,18 +124,14 @@ public class TodoUtil {
 		}
 		System.out.printf("\n총 %d개의 카테고리가 등록되어 있습니다.\n",count);
 	}
-
-	public static void saveList(TodoList l,String filename) {
-		for(TodoItem myitem : l.getList()) {
-			try(FileWriter fo= new FileWriter(filename,true)){
-				fo.write(myitem.toSaveString());
-			}
-			catch(IOException e) {
-				e.printStackTrace();
-			}
-		}
-		
+	
+	public static void postponeList(TodoList l,int id) {
+		if(l.postponeItem(id)>0)
+			System.out.printf("%d번의 일정을 하루 미뤘습니다.\n",id);
 	}
+	
+	
+	
 	
 	public static void findList(TodoList l,String keyword) {
 		int count=0;
@@ -120,7 +144,16 @@ public class TodoUtil {
 	
 	public static void findComp(TodoList l,int comp) {
 		int count=0;
-		for(TodoItem myitem : l.getList(comp)) {
+		for(TodoItem myitem : l.getList1(comp)) {
+			System.out.println(myitem.toString());
+			count++;
+		}
+		System.out.printf("총 %d개의 항목을 찾았습니다.\n", count);
+	}
+	
+	public static void findLate(TodoList l,int late) {
+		int count=0;
+		for(TodoItem myitem : l.getList2(late)) {
 			System.out.println(myitem.toString());
 			count++;
 		}

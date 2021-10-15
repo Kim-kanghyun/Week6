@@ -1,7 +1,13 @@
 package com.todo;
 
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.sql.PreparedStatement;
 import java.util.Scanner;
+import java.util.StringTokenizer;
 
 import com.todo.dao.TodoList;
 import com.todo.menu.Menu;
@@ -70,6 +76,11 @@ public class TodoMain {
 			case "ls_cate":
 				TodoUtil.listCateAll(l);
 				break;
+			
+			case "find_cate":
+				String cate=sc.nextLine().trim();
+				TodoUtil.findCateList(l,cate);
+				break;
 				
 			case "exit":
 				quit = true;
@@ -83,7 +94,34 @@ public class TodoMain {
 			case "ls_comp":
 				TodoUtil.findComp(l,1);
 				break;
-
+			
+			case "ls_late":
+				TodoUtil.findLate(l,1);
+				break;
+			
+			case "late_check":
+				TodoUtil.checkAll(l);
+				break;
+				
+			case "delete_mul":
+				TodoUtil.deleteItemMul(l);
+				break;
+			
+			case "postpone":
+				int id1=sc.nextInt();
+				TodoUtil.postponeList(l, id1);
+				break;
+				
+			case "comp_mul":
+				
+				String line=sc.nextLine();
+				StringTokenizer st =new StringTokenizer(line, " ");
+				while(st.hasMoreTokens()) {
+					int id=Integer.parseInt(st.nextToken());
+						TodoUtil.completeItem(l,id);
+						}
+				break;
+					
 			default:
 				System.out.println("정확한 명령어를 입력하세요. (도움말 - help)");
 				break;
